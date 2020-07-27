@@ -1,2 +1,0 @@
-==4524== NVPROF is profiling process 4524, command: /home/bomilk/Desktop/git/Paralela2020/PRACTICA3 - CUDA/evolution 5000 5000 30 1000.0 0.005 20.0 28783 648 47734 250000
-==4524== Generated result file: /home/bomilk/Desktop/git/Paralela2020/PRACTICA3 - CUDA/.metadata/.plugins/com.nvidia.viper/launch/1/api_4524.log

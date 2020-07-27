@@ -1,2 +1,0 @@
-==3513== NVPROF is profiling process 3513, command: /home/bomilk/Desktop/git/Paralela2020/PRACTICA3 - CUDA/evolution 5000 5000 30 1000.0 0.005 20.0 28783 648 47734 250000
-==3513== Generated result file: /home/bomilk/Desktop/git/Paralela2020/PRACTICA3 - CUDA/.metadata/.plugins/com.nvidia.viper/launch/0/api_3513.log
