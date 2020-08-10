@@ -12,9 +12,9 @@ The students were given a sequential C-coded version of the simulation, and thei
 The original description for the sequential program can be found [here](description.md).
 
 # Contest results
- - g110's OpenMP implementation of the simulation was ranked #5 in the OpenMP contest.
- - g110's MPI implementation of the simulation was ranked #1 in the MPI contest.
- - g110's CUDA implementation of the simulation was ranked #1 in the CUDA contest.
+ - g110's OpenMP implementation of the simulation was ranked #5 in the OpenMP contest. The contest's test executions can be found [here](/OpenMP/tests.md).
+ - g110's MPI implementation of the simulation was ranked #1 in the MPI contest. The contest's test executions can be found [here](/MPI/tests.md).
+ - g110's CUDA implementation of the simulation was ranked #1 in the CUDA contest. The contest's test executions can be found [here](/CUDA/tests.md).
 
 # Repository's strucutre
 WIP.
