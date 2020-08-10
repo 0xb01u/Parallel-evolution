@@ -22,7 +22,7 @@ Two simulation examples (one without special food spot and another with it) can 
  - Character `'.'`: Food under 5 units.
  - Character `'*'`: Food between 5 and 10 units.
  - Character `'+'`: Food above 10 units.
- - Number between brackets: (x): Culture cell with x living cells.
+ - Number between brackets: `(x)`: Culture cell with x living cells.
 
 # 2. Details in the sequential code
 
