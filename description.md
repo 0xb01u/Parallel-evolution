@@ -19,9 +19,9 @@ When a cell reaches maturity (a pre-established number of simulation steps), if 
 
 ### Examples
 Two simulation examples (one without special food spot and another with it) can be found on the [output_example file](output_example.md). The symbols on each control spots have the following meaning:
- - Character '.': Food under 5 units.
- - Character '\*': Food between 5 and 10 units.
- - Character '+': Food above 10 units.
+ - Character `'.'`: Food under 5 units.
+ - Character `'*'`: Food between 5 and 10 units.
+ - Character `'+'`: Food above 10 units.
  - Number between brackets: (x): Culture cell with x living cells.
 
 # 2. Details in the sequential code
