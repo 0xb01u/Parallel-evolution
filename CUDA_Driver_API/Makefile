@@ -24,3 +24,6 @@ tgz:
 
 clean:
 	rm -f evolution debug *.ptx *.tgz
+
+del:
+	rm -f evolution debug
