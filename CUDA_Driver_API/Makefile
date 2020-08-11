@@ -23,7 +23,7 @@ tgz:
 	tar -czf evolution_cuda_api.tgz Makefile evolution_CUDA_g110.c evolution_kernels.cu include
 
 clean:
-	rm -f evolution debug *.ptx *.tgz
+	rm -f evolution debug *.ptx
 
 del:
-	rm -f evolution debug
+	rm -f evolution debug *.tgz

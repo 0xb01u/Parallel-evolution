@@ -4,7 +4,7 @@
  * Computacion Paralela, Grado en Informatica (Universidad de Valladolid)
  * 2019/2020
  *
- * v1.5
+ * v1.6
  *
  * CHANGES:
  * 1) Float values have been substituted by fixed point arithmetics 
@@ -14,6 +14,10 @@
  *	Taylor polynomials. 
  * 3) nrand48 function has been extracted from glibc source code and 
  *	its internal API simplified to allow its use in the GPU.
+ * 4) The kernel functions have been separated from the main program into a 
+ *  different file.
+ * 5) It now uses CUDA Driver API, instead of regular CUDA syntax, and,
+ *  thus, this file can be compiled using gcc.
  *
  * (c) 2020, Arturo Gonzalez Escribano
  */
@@ -320,7 +324,7 @@ int main(int argc, char *argv[]) {
 	/* Module load */
 	static char path[256];
 	int c = (int)strlen(argv[0]) - 1;
-	while (argv[0][c] != '/') c--;
+	while (argv[0][--c] != '/');
 	strncpy(path, argv[0], c + 1);
 
 	CUmodule evolution_kernels;
@@ -405,7 +409,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		Statistics prev_stats = sim_stat;		
-		cudaCheckCall(cuMemcpyDtoHAsync(&sim_stat, stats_d, sizeof(Statistics), alt));
+		cudaCheckCall(cuMemcpyDtoH(&sim_stat, stats_d, sizeof(Statistics)));	// For some reason, async calls don't get synchronized
+																				// even using the cudaStreamSychronize(alt) at the end.
 
 		/* Recalculate number of cells alive */
 		if (iter > 0)	// Needed because prev_stats is all zeroes initialy.
@@ -447,7 +452,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		Statistics prev_stats = sim_stat;		
-		cudaCheckCall(cuMemcpyDtoHAsync(&sim_stat, stats_d, sizeof(Statistics), alt));
+		cudaCheckCall(cuMemcpyDtoH(&sim_stat, stats_d, sizeof(Statistics)));	// For some reason, async calls don't get synchronized
+																				// even using the cudaStreamSychronize(alt) at the end.
 
 		num_cells_alive += (sim_stat.history_total_cells - prev_stats.history_total_cells) - (sim_stat.history_dead_cells - prev_stats.history_dead_cells);
 #ifdef DEBUG
@@ -458,6 +464,7 @@ int main(int argc, char *argv[]) {
 
 	cudaCheckCall(cuMemFree(culture_d));
 	cudaCheckCall(cuMemFree(culture_cells_d));
+	cudaCheckCall(cuStreamSynchronize(alt));
 
 /*
  *

@@ -1,3 +1,13 @@
+/*
+ * Kernel functions for the simplified simulation of life evolution
+ *
+ * Computacion Paralela, Grado en Informatica (Universidad de Valladolid)
+ * 2019/2020
+ *
+ * v1.6
+ *
+ * (c) 2020, Arturo Gonzalez Escribano
+ */
 #include "include/taylor_trig.h"
 #include "include/glibc_nrand48.h"
 #include "include/atomic.h"
@@ -276,14 +286,7 @@ extern "C" __global__ void step1()
 			}
 			/* 4.3.4. Annotate that there is one more cell in this culture position */
 			short *pos = &accessMat( culture_cells, my_cell->pos_row / PRECISION, my_cell->pos_col / PRECISION );
-			int inc = 0x1;
-			if (((long)pos) % 4 != 0)
-			{
-				pos -= 1;
-				inc = 0x10000;
-
-			}
-			atomicAdd((int *)pos, inc);
+			atomicAdd(pos, (short)1);
 		}
 
 	} // End cell movements

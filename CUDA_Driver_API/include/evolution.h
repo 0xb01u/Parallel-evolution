@@ -1,3 +1,10 @@
+/*
+ * evolution:
+ *
+ * Constants, custom types, and macro functions used in the
+ * evolution simulation program and its kernels.
+ */
+
 /* 
  * Constants: Converted to fixed point with the given PRECISION
  */
