@@ -410,7 +410,7 @@ int main(int argc, char *argv[]) {
 
 		Statistics prev_stats = sim_stat;		
 		cudaCheckCall(cuMemcpyDtoH(&sim_stat, stats_d, sizeof(Statistics)));	// For some reason, async calls don't get synchronized
-																				// even using the cudaStreamSychronize(alt) at the end.
+		                                                                    	// even using the cudaStreamSychronize(alt) at the end.
 
 		/* Recalculate number of cells alive */
 		if (iter > 0)	// Needed because prev_stats is all zeroes initialy.
