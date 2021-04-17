@@ -54,4 +54,4 @@ The students should be cautious when dealing with random number generation. The 
 
 ## Copyright
 (c) 2020 Arturo Gonzalez Escribano
-Used in Universidad de Valladolid's course on Parallel Computer, from its Software Engineering degree, academic year 2019-2020.
+Used in Universidad de Valladolid's course on Parallel Computing, from its Software Engineering degree, academic year 2019-2020.
