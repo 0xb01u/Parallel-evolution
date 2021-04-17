@@ -72,7 +72,7 @@ typedef struct {
 #define max3(x, y, z) max(max(x, y), z)
 
 /*
- * Minimum of two or values
+ * Minimum of two values
  *
  */
 #define min(x, y) (x < y ? x : y)
