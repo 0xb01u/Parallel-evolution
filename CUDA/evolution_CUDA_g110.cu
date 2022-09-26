@@ -390,14 +390,7 @@ __global__ void step1()
 			}
 			/* 4.3.4. Annotate that there is one more cell in this culture position */
 			short *pos = &accessMat( culture_cells, my_cell->pos_row / PRECISION, my_cell->pos_col / PRECISION );
-			int inc = 0x1;
-			if (((long)pos) % 4 != 0)
-			{
-				pos -= 1;
-				inc = 0x10000;
-
-			}
-			atomicAdd((int *)pos, inc);
+			atomicAdd(pos, (short)1);
 		}
 
 	} // End cell movements
