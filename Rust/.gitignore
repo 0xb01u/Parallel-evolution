@@ -1,0 +1,7 @@
+# Rust specific files:
+Cargo.lock
+target/
+
+# Binary
+evolution
+
