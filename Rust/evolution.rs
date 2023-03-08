@@ -365,7 +365,7 @@ fn main() {
             }
         }
         /* 4.2.2. Allocate ancillary structure to store the food level to be shared by cells in the same culture place */
-        let mut food_to_share: Vec<f32> = vec![0.0f32; args.num_cells as usize];
+        let mut food_to_share: Vec<f32> = vec![0.0f32; num_cells as usize];
 
         /* 4.3. Cells movements */
         let mut i: usize = 0usize;
@@ -487,6 +487,7 @@ fn main() {
             for cell in new_cells {
                 cells.push(cell);
             }
+            num_cells += step_new_cells;
         }
 
         /* 4.8. Decrease non-harvested food */
