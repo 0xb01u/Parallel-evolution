@@ -368,8 +368,8 @@ fn main() {
         let mut food_to_share: Vec<f32> = vec![0.0f32; num_cells as usize];
 
         /* 4.3. Cells movements */
-        let mut i: usize = 0usize;
-        for cell in cells.iter_mut() {
+        for it in cells.iter_mut().zip(food_to_share.iter_mut()) {
+            let (cell, share): (&mut Cell, &mut f32) = it;
             if cell.alive {
                 cell.age += 1;
                 // Statistics: Max age of a cell in the simulation history
@@ -420,20 +420,18 @@ fn main() {
                 /* 4.3.4. Annotate that there is one more cell in this culutre position */
                 culture_cells[(cell.pos_row as usize, cell.pos_col as usize)] += 1;
                 /* 4.3.5. Annotate the amount of food to be shared in this culture position */
-                food_to_share[i] = culture[(cell.pos_row as usize, cell.pos_col as usize)];
+                *share = culture[(cell.pos_row as usize, cell.pos_col as usize)];
             }
-            i += 1;
         } // End of cell movements
 
         /* 4.4. Cell actions */
         // Space for the list of new cells (maximum number of new cells is num_cells)
         let mut new_cells: Vec<Cell> = Vec::<Cell>::with_capacity(num_cells as usize);
 
-        i = 0usize;
-        for cell in cells.iter_mut() {
+        for it in cells.iter_mut().zip(food_to_share.iter()) {
+            let (cell, food): (&mut Cell, &f32) = it;
             if cell.alive {
                 /* 4.4.1. Food harvesting */
-                let food: f32 = food_to_share[i];
                 let count: i16 = culture_cells[(cell.pos_row as usize, cell.pos_col as usize)];
                 let my_food: f32 = food / count as f32;
                 cell.storage += my_food;
@@ -467,7 +465,6 @@ fn main() {
                     cell_mutation(&mut new_cells[step_new_cells as usize - 1]);
                 }
             }
-            i += 1;
         } // End cell actions
 
         /* 4.5. Clean ancillary data structures */
