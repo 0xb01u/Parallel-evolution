@@ -348,8 +348,8 @@ fn main() {
         if food_spot_active {
             let num_new_sources: i32 = (args.food_spot_size_rows as f32 * args.food_spot_size_cols as f32 * args.food_spot_denisty) as i32;
             for _ in 0..num_new_sources {
-                let row: usize = food_spot_random_seq.gen_range(args.food_spot_row..args.food_spot_size_rows) as usize;
-                let col: usize = food_spot_random_seq.gen_range(args.food_spot_col..args.food_spot_size_cols) as usize;
+                let row: usize = args.food_spot_row + food_spot_random_seq.gen_range(0..args.food_spot_size_rows) as usize;
+                let col: usize = args.food_spot_col + food_spot_random_seq.gen_range(0..args.food_spot_size_cols) as usize;
                 let food: f32 = food_spot_random_seq.gen_range(0f32..args.food_spot_level);
                 culture[(row, col)] += food;
             }
