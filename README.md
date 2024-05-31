@@ -34,6 +34,6 @@ In the root directory are located various folders with different library/platfor
 The `tested_executions` folder contains a collection of the tests used by g110 to test their implementations of the evolution simulation. It contains all the tests used in every contest.
 
 # Related repositories
-[Cerberus](https://www.github.com/0xb01u/Cerberus) is a Discord bot simulating the CUDA's contest's execution queue server, and was used by various teams to program, debug, and test their programs, including g110. The list of execution tests developed (partly) by g110 and used to test the parallel implementations can be found [in Cerberus' repository]([https://github.com/0xb01u/Cerberus/tree/master/tests](https://github.com/0xb01u/Cerberus/tree/evolution/tests), as the tests were always integrated within the bot.
+[Cerberus](https://www.github.com/0xb01u/Cerberus) is a Discord bot simulating the CUDA's contest's execution queue server, and was used by various teams to program, debug, and test their programs, including g110. The list of execution tests developed (partly) by g110 and used to test the parallel implementations can be found [in Cerberus' repository](https://github.com/0xb01u/Cerberus/tree/evolution), as the tests were always integrated within the bot.
 
 [Hermes](https://github.com/0xb01u/Hermes) is another Discord bot that serves as intermediary between Discord's client and the contests' execution queues (known as [Tablón](http://frontendv.infor.uva.es/faq)). It developed as an evolution of Cerberus.
