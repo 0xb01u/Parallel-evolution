@@ -1,5 +1,5 @@
 
-CFLAGS= -Wall -I./include -O3 -DCUDA_CHECK
+CFLAGS= -Wall -I./include -I/usr/local/cuda/include -O3
 CFLAGS_DEBUG= -Wall -I./include -O0 -g -DCUDA_CHECK
 LIBS= -lcuda
 CC=gcc
