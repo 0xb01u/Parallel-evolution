@@ -42,11 +42,8 @@ typedef struct {
  * Get an uniformly distributed random number between 0 and max
  * It uses glibc_nrand, that returns a number between 0 and 2^31
  */
-#ifdef __CUDACC__
+#include "glibc_nrand48.h"
 #define int_urand48( max, seq )	(int)( (long)(max) * glibc_nrand48( seq ) / 2147483648 )
-#else
-#define int_urand48( max, seq )	(int)( (long)(max) * nrand48( seq ) / 2147483648 )
-#endif // __CUDACC__
 
 /* 
  * Macro function to simplify accessing with two coordinates to a flattened array

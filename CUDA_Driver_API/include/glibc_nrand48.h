@@ -26,9 +26,15 @@
  * Academic year 2019/2020
  */
 
+#ifndef _GLIBC_NRAND48_H_
+#define _GLIBC_NRAND48_H_
+
 #include <stdlib.h>
 
-__device__ void
+#ifdef __CUDACC__
+__device__
+#endif // __CUDACC__
+void
 glibc_rand48_iterate (unsigned short int xsubi[3])
 {
   u_int64_t X;
@@ -48,7 +54,10 @@ glibc_rand48_iterate (unsigned short int xsubi[3])
 }
 
 
-__device__ long int
+#ifdef __CUDACC__
+__device__
+#endif // __CUDACC__
+long int
 glibc_nrand48 (unsigned short int xsubi[3])
 {
   long int result;
@@ -64,4 +73,5 @@ glibc_nrand48 (unsigned short int xsubi[3])
 
   return result;
 }
+#endif // _GLIBC_NRAND48_H_
 
