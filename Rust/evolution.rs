@@ -55,7 +55,6 @@ struct Statistics {
 }
 
 /* Matrix structure to simplify accessing with two coordinates to a flattened array/vector */
-
 struct Mat<T> {
    data: Vec<T>,
    rows: usize,
@@ -93,53 +92,55 @@ impl<T: Default + Clone> Mat<T> {
 }
 
 /* Function: Choose a new direction of movement for a cell */
-fn cell_new_direction(cell: &mut Cell) {
-    let angle: f32 = 2f32 * PI * cell.random_seq.gen_range(0f32..1f32);
-    cell.mov_row = angle.sin();
-    cell.mov_col = angle.cos();
-}
-
-/* Function: Mutation of the movement genes on a new cell */
-fn cell_mutation(cell: &mut Cell) {
-    /* 1. Select which genes to change:
-        0 Left grows taking part of the Advance part
-        1 Advance grows taking part of the Left part
-        2 Advance grows taking part of the Right part
-        3 Right grows taking part of the Advance part
-     */
-    let mutation_type: i32 = cell.random_seq.gen_range(0i32..4i32);
-    /* 2. Select the amount of mutation (up to 50%) */
-    let mutation_percentge: f32 = cell.random_seq.gen_range(0f32..0.5f32);
-    /* 3. Apply the mutation */
-    let mutation_value: f32;
-    match mutation_type{
-        0 => {
-            mutation_value = cell.choose_mov[1] * mutation_percentge;
-            cell.choose_mov[1] -= mutation_value;
-            cell.choose_mov[0] += mutation_value;
-        }
-        1 => {
-            mutation_value = cell.choose_mov[0] * mutation_percentge;
-            cell.choose_mov[0] -= mutation_value;
-            cell.choose_mov[1] += mutation_value;
-        }
-        2 => {
-            mutation_value = cell.choose_mov[2] * mutation_percentge;
-            cell.choose_mov[2] -= mutation_value;
-            cell.choose_mov[1] += mutation_value;
-        }
-        3 => {
-            mutation_value = cell.choose_mov[1] * mutation_percentge;
-            cell.choose_mov[1] -= mutation_value;
-            cell.choose_mov[2] += mutation_value;
-        }
-        _ => {
-            eprintln!("Error: Impossible type of mutation");
-            exit(EXIT_FAILURE);
-        }
+impl Cell {
+    fn new_direction(&mut self) {
+        let angle: f32 = 2f32 * PI * self.random_seq.gen_range(0f32..1f32);
+        self.mov_row = angle.sin();
+        self.mov_col = angle.cos();
     }
-    /* 4. Correct potential precision problems */
-    cell.choose_mov[2] = 1.0f32 - cell.choose_mov[1] - cell.choose_mov[0];
+
+    /* Function: Mutation of the movement genes on a new cell */
+    fn mutation(&mut self) {
+        /* 1. Select which genes to change:
+            0 Left grows taking part of the Advance part
+            1 Advance grows taking part of the Left part
+            2 Advance grows taking part of the Right part
+            3 Right grows taking part of the Advance part
+         */
+        let mutation_type: i32 = self.random_seq.gen_range(0i32..4i32);
+        /* 2. Select the amount of mutation (up to 50%) */
+        let mutation_percentge: f32 = self.random_seq.gen_range(0f32..0.5f32);
+        /* 3. Apply the mutation */
+        let mutation_value: f32;
+        match mutation_type{
+            0 => {
+                mutation_value = self.choose_mov[1] * mutation_percentge;
+                self.choose_mov[1] -= mutation_value;
+                self.choose_mov[0] += mutation_value;
+            }
+            1 => {
+                mutation_value = self.choose_mov[0] * mutation_percentge;
+                self.choose_mov[0] -= mutation_value;
+                self.choose_mov[1] += mutation_value;
+            }
+            2 => {
+                mutation_value = self.choose_mov[2] * mutation_percentge;
+                self.choose_mov[2] -= mutation_value;
+                self.choose_mov[1] += mutation_value;
+            }
+            3 => {
+                mutation_value = self.choose_mov[1] * mutation_percentge;
+                self.choose_mov[1] -= mutation_value;
+                self.choose_mov[2] += mutation_value;
+            }
+            _ => {
+                eprintln!("Error: Impossible type of mutation");
+                exit(EXIT_FAILURE);
+            }
+        }
+        /* 4. Correct potential precision problems */
+        self.choose_mov[2] = 1.0f32 - self.choose_mov[1] - self.choose_mov[0];
+    }
 }
 
 #[cfg(feature = "debug")]
@@ -308,7 +309,7 @@ fn main() {
         cell.pos_row = cell.random_seq.gen_range(0f32..args.rows as f32);
         cell.pos_col = cell.random_seq.gen_range(0f32..args.cols as f32);
         // Movement direction: Unity vector in a random direction
-        cell_new_direction(cell);
+        cell.new_direction();
     }
 
     // Statistics: Initialize total number of cells, and max. alive
@@ -360,8 +361,8 @@ fn main() {
         for i in 0usize..args.rows {
             for j in 0usize..args.cols {
                 culture_cells[(i, j)] = 0i16; // In the original C code, this was intentionally left as a f32
-                                              // (a inoffensive "bug" for the students to find),
-                                              // however, rust's compiler does not allow it.
+                                              // (an inoffensive "bug" for the students to find),
+                                              // however, Rust's compiler does not allow it.
             }
         }
         /* 4.2.2. Allocate ancillary structure to store the food level to be shared by cells in the same culture place */
@@ -457,12 +458,12 @@ fn main() {
                     new_cells[step_new_cells as usize - 1].age = 1i32;
 
                     // Both cells start in random directions
-                    cell_new_direction(cell);
-                    cell_new_direction(&mut new_cells[step_new_cells as usize - 1]);
+                    cell.new_direction();
+                    new_cells[step_new_cells as usize - 1].new_direction();
 
                     // Mutations of the movement genes in both cells
-                    cell_mutation(cell);
-                    cell_mutation(&mut new_cells[step_new_cells as usize - 1]);
+                    cell.mutation();
+                    new_cells[step_new_cells as usize - 1].mutation();
                 }
             }
         } // End cell actions
