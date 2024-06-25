@@ -91,8 +91,8 @@ impl<T: Default + Clone> Mat<T> {
     }
 }
 
-/* Function: Choose a new direction of movement for a cell */
 impl Cell {
+    /* Function: Choose a new direction of movement for a cell */
     fn new_direction(&mut self) {
         let angle: f32 = 2f32 * PI * self.random_seq.gen_range(0f32..1f32);
         self.mov_row = angle.sin();
