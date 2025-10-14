@@ -256,6 +256,30 @@ int main(int argc, char *argv[]) {
 	cudaCheckCall(cuDeviceGet(&device, 0));
 	cudaCheckCall(cuCtxCreate(&context, 0, device));
 
+	/* Kernel module load */
+	static char path[256];
+	int c = (int)strlen(argv[0]) - 1;
+	while (argv[0][--c] != '/');
+	strncpy(path, argv[0], c + 1);
+
+	CUmodule evolution_kernels;
+	#ifdef DEBUG
+	cudaCheckCall(cuModuleLoad(&evolution_kernels, strcat(path, "kernels_debug.ptx")));
+	#else
+	cudaCheckCall(cuModuleLoad(&evolution_kernels, strcat(path, "kernels.ptx")));
+	#endif // DEBUG
+
+	/* Kernel loads */
+	CUfunction initGPU, initCells, step1, cleanCells, placeFood, step2, recount, step3;
+	cudaCheckCall(cuModuleGetFunction(&initGPU, evolution_kernels, "initGPU"));
+	cudaCheckCall(cuModuleGetFunction(&initCells, evolution_kernels, "initCells"));
+	cudaCheckCall(cuModuleGetFunction(&step1, evolution_kernels, "step1"));
+	cudaCheckCall(cuModuleGetFunction(&cleanCells, evolution_kernels, "cleanCells"));
+	cudaCheckCall(cuModuleGetFunction(&placeFood, evolution_kernels, "placeFood"));
+	cudaCheckCall(cuModuleGetFunction(&step2, evolution_kernels, "step2"));
+	cudaCheckCall(cuModuleGetFunction(&recount, evolution_kernels, "recount"));
+	cudaCheckCall(cuModuleGetFunction(&step3, evolution_kernels, "step3"));
+
 	/* 2. Start global timer */
 	double ttotal = cp_Wtime();
 
@@ -321,30 +345,6 @@ int main(int argc, char *argv[]) {
 	cudaCheckCall(cuMemAlloc(&stats_d, sizeof(Statistics)));
 
 	/* Device intialization */
-	/* Module load */
-	static char path[256];
-	int c = (int)strlen(argv[0]) - 1;
-	while (argv[0][--c] != '/');
-	strncpy(path, argv[0], c + 1);
-
-	CUmodule evolution_kernels;
-	#ifdef DEBUG
-	cudaCheckCall(cuModuleLoad(&evolution_kernels, strcat(path, "kernels_debug.ptx")));
-	#else
-	cudaCheckCall(cuModuleLoad(&evolution_kernels, strcat(path, "kernels.ptx")));
-	#endif // DEBUG
-
-	/* Functions load */
-	CUfunction initGPU, initCells, step1, cleanCells, placeFood, step2, recount, step3;
-	cudaCheckCall(cuModuleGetFunction(&initGPU, evolution_kernels, "initGPU"));
-	cudaCheckCall(cuModuleGetFunction(&initCells, evolution_kernels, "initCells"));
-	cudaCheckCall(cuModuleGetFunction(&step1, evolution_kernels, "step1"));
-	cudaCheckCall(cuModuleGetFunction(&cleanCells, evolution_kernels, "cleanCells"));
-	cudaCheckCall(cuModuleGetFunction(&placeFood, evolution_kernels, "placeFood"));
-	cudaCheckCall(cuModuleGetFunction(&step2, evolution_kernels, "step2"));
-	cudaCheckCall(cuModuleGetFunction(&recount, evolution_kernels, "recount"));
-	cudaCheckCall(cuModuleGetFunction(&step3, evolution_kernels, "step3"));
-
 	void *initGPU_args[8] = { &culture_d, &culture_cells_d, &rows, &columns, &cells_d1, &cells_d2, &num_cells, &stats_d };
 	cudaCheckCall(cuLaunchKernel(initGPU, 1, 1, 1, 1, 1, 1, 0, 0, initGPU_args, NULL));
 	void *initCells_args[1] = { &random_seqs_d };
