@@ -1,7 +1,7 @@
 # OpenMP Contest's tests
 ```
 threads:32
-arguments:123 47 100 100 0.212 3.21 4586 23 9807 11
+arguments: 123 47 100 100 0.212 3.21 4586 23 9807 11
 results: 100, 88, 88, 0, 88, 12, 0, 31, 22.099371
 
 threads:48

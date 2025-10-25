@@ -22,16 +22,17 @@ Two additional implementations have been added to this repository:
 
 # Repository's strucutre
 In the root directory are located various folders with different library/platform names, and a `tested_executions` folder. In the library/platform folders, the following files and folders are found:
- - `evolution_<folder_name>_g110.c`: the latest and most optimized implementation of the evolution simulation developed by g110 team, using the libraries/platforms indicated by the folder the file is in.
- - `Makefile`: the makefile to compile the file specified above, using `make`. The output file will be called `evolution`. The makefiles contains a `debug` mode, similar to the makefiles provided to the students; however, the debug option for the evolution simulations will probably not work in any parallel implementation.
+ - `evolution_<folder_name>_g110.c`: The latest and most optimized implementation of the evolution simulation developed by g110 team, using the libraries/platforms indicated by the folder the file is in.
+ - `Makefile`: The makefile to compile the file specified above, using `make`. The output file will be called `evolution`. The makefiles contains a `debug` mode, similar to the makefiles provided to the students; however, the debug option for the evolution simulations will probably not work in any parallel implementation.
  - \*\*\*`g_110_p<some_number>`: The final version of g110's program in the corresponding leaderboard. As the leaderboards had a closing deadline, this file might not be the same as the one described in the first item of this list.
- - \*\*\*`original_src/`: a folder containing the original files provided to the students to develop the corresponding program.
- - \*\*\*`tests.md`: the execution tests for the respective contest.
+ - \*\*\*`original_src/`: A folder containing the original files provided to the students to develop the corresponding program.
+ - \*\*\*`tests.md`: The execution tests for the respective contest.
  - \*\*\*A `pdf` file: g110's report on the corresponding implementation of the simulation, which had to be included to evaluate the assignment.
+ - `test.sh`: Convenience script for executing all the recorded tests, includign those in the `tested_executions` folder, and those specified in the `tests.md` files. Repeated tests, and tests that cause a segmentation fault when executed in one node, have been excluded, however. The script is intended to use one thread/process in CPU implementations.
 
 (Three asterisks denote the file or folder is related only to the original assignment, and thus will not be found in extra implementations of the simulation.)
 
-The `tested_executions` folder contains a collection of the tests used by g110 to test their implementations of the evolution simulation. These include all the execution inputs used in every contest (which were revealed once the contest itself had finished).
+The `tested_executions` folder contains a collection of the tests used by g110 to test their implementations of the evolution simulation. These do not include all the execution inputs used in every contest (which were revealed once the contest itself had finished).
 
 # Related repositories
 [Cerberus](https://www.github.com/0xb01u/Cerberus) is a Discord bot simulating the CUDA's contest's execution queue server, and was used by various teams to program, debug, and test their programs, including g110. The list of execution tests developed (partly) by g110 and used to test the parallel implementations can be found [in Cerberus' repository](https://github.com/0xb01u/Cerberus/tree/evolution), as the tests were always integrated within the bot.
