@@ -1,64 +1,66 @@
 extern crate rand;
 extern crate rand_chacha;
 
-use std::clone::Clone;
-use std::f32::consts::PI;
-use std::fmt;
-use std::ops::{Index, IndexMut};
-use std::process::exit;
-use std::time::{Instant, Duration};
 use clap::Parser;
 use rand::prelude::*;
 use rand_chacha::ChaCha8Rng;
+use std::{
+    clone::Clone,
+    f32::consts::PI,
+    fmt,
+    ops::{Index, IndexMut},
+    process::exit,
+    time::{Duration, Instant},
+};
 
 const EXIT_FAILURE: i32 = 1i32;
 
 /* Structure to store data of a cell */
 struct Cell {
-    pos_row: f32,   // Position
-    pos_col: f32,   // Position
-    mov_row: f32,   // Direction of movement
-    mov_col: f32,   // Direction of movement
-    choose_mov: [f32; 3],   // Genes: Probabilities of 0 turning left; 1 advance; 2 turning-right
-    storage: f32,   // Food/Energy stored
-    age: i32,   // Number of steps that the cell has been alive
-    random_seq: Box<dyn RngCore>,   // Particular random sequence generator
-    alive: bool,    // Flag indicating if the cell is still alive
+    pos_row: f32,                 // Position
+    pos_col: f32,                 // Position
+    mov_row: f32,                 // Direction of movement
+    mov_col: f32,                 // Direction of movement
+    choose_mov: [f32; 3], // Genes: Probabilities of 0 turning left; 1 advance; 2 turning-right
+    storage: f32,         // Food/Energy stored
+    age: i32,             // Number of steps that the cell has been alive
+    random_seq: Box<dyn RngCore>, // Particular random sequence generator
+    alive: bool,          // Flag indicating if the cell is still alive
 }
 
 /* Make Cell struct debug-printable (with "{:?}") */
 impl fmt::Debug for Cell {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Cell")
-         .field("alive", &self.alive)
-         .field("pos_row", &self.pos_row)
-         .field("pos_col", &self.pos_col)
-         .field("mov_row", &self.mov_row)
-         .field("mov_col", &self.mov_col)
-         .field("choose_mov", &self.choose_mov)
-         .field("storage", &self.storage)
-         .field("age", &self.age)
-         .finish()
+            .field("alive", &self.alive)
+            .field("pos_row", &self.pos_row)
+            .field("pos_col", &self.pos_col)
+            .field("mov_row", &self.mov_row)
+            .field("mov_col", &self.mov_col)
+            .field("choose_mov", &self.choose_mov)
+            .field("storage", &self.storage)
+            .field("age", &self.age)
+            .finish()
     }
 }
 
 /* Structure for simulation statistics */
 #[derive(Default)]
 struct Statistics {
-    history_total_cells: i32,   // Accumulated number of cells created
-    history_dead_cells: i32,    // Accumulated number of dead cells
-    history_max_alive_cells: i32,   // Maximum number of cells alive in a step
-    history_max_new_cells: i32, // Maximum number of cells created in a step
-    history_max_dead_cells: i32,    // Maximum number of cells that died in a single step
-    history_max_age: i32,   // Maximum age achieved by a cell
-    history_max_food: f32,  // Maximum food level in a position of the culture
+    history_total_cells: i32,     // Accumulated number of cells created
+    history_dead_cells: i32,      // Accumulated number of dead cells
+    history_max_alive_cells: i32, // Maximum number of cells alive in a step
+    history_max_new_cells: i32,   // Maximum number of cells created in a step
+    history_max_dead_cells: i32,  // Maximum number of cells that died in a single step
+    history_max_age: i32,         // Maximum age achieved by a cell
+    history_max_food: f32,        // Maximum food level in a position of the culture
 }
 
 /* Matrix structure to simplify accessing with two coordinates to a flattened array/vector */
 struct Mat<T> {
-   data: Vec<T>,
-   rows: usize,
-   cols: usize,
+    data: Vec<T>,
+    rows: usize,
+    cols: usize,
 }
 
 /* Immutable index operator; i.e. matrix element accesser (getter) */
@@ -94,7 +96,7 @@ impl<T: Default + Clone> Mat<T> {
 impl Cell {
     /* Function: Choose a new direction of movement for a cell */
     fn new_direction(&mut self) {
-        let angle: f32 = 2f32 * PI * self.random_seq.gen_range(0f32..1f32);
+        let angle: f32 = 2f32 * PI * self.random_seq.random_range(0f32..1f32);
         self.mov_row = angle.sin();
         self.mov_col = angle.cos();
     }
@@ -102,17 +104,17 @@ impl Cell {
     /* Function: Mutation of the movement genes on a new cell */
     fn mutation(&mut self) {
         /* 1. Select which genes to change:
-            0 Left grows taking part of the Advance part
-            1 Advance grows taking part of the Left part
-            2 Advance grows taking part of the Right part
-            3 Right grows taking part of the Advance part
-         */
-        let mutation_type: i32 = self.random_seq.gen_range(0i32..4i32);
+           0 Left grows taking part of the Advance part
+           1 Advance grows taking part of the Left part
+           2 Advance grows taking part of the Right part
+           3 Right grows taking part of the Advance part
+        */
+        let mutation_type: i32 = self.random_seq.random_range(0i32..4i32);
         /* 2. Select the amount of mutation (up to 50%) */
-        let mutation_percentge: f32 = self.random_seq.gen_range(0f32..0.5f32);
+        let mutation_percentge: f32 = self.random_seq.random_range(0f32..0.5f32);
         /* 3. Apply the mutation */
         let mutation_value: f32;
-        match mutation_type{
+        match mutation_type {
             0 => {
                 mutation_value = self.choose_mov[1] * mutation_percentge;
                 self.choose_mov[1] -= mutation_value;
@@ -145,7 +147,14 @@ impl Cell {
 
 #[cfg(feature = "debug")]
 /* Function: Print the current state of the simulation */
-fn print_status(iteration: i32, culture: &Mat<f32>, num_cells: i32, cells: &Vec<Cell>, num_cells_alive: i32, sim_stat: &Statistics) {
+fn print_status(
+    iteration: i32,
+    culture: &Mat<f32>,
+    num_cells: i32,
+    cells: &Vec<Cell>,
+    num_cells_alive: i32,
+    sim_stat: &Statistics,
+) {
     println!("Iteration: {}", iteration);
     print!("+");
     for _ in 0..culture.cols {
@@ -190,20 +199,38 @@ fn print_status(iteration: i32, culture: &Mat<f32>, num_cells: i32, cells: &Vec<
     }
     println!("+");
 
-    println!("Num_cells_alive: {:0>4}\nHistory( Cells: {:0>4}, Dead: {:0>4}, Max.alive: {:0>4}, Max.new: {:0>4}, Max.dead: {:0>4}, Max.age {:0>4}, Max.food: {:.6?}\n",
-       num_cells_alive,
-       sim_stat.history_total_cells,
-       sim_stat.history_dead_cells,
-       sim_stat.history_max_alive_cells,
-       sim_stat.history_max_new_cells,
-       sim_stat.history_max_dead_cells,
-       sim_stat.history_max_age,
-       sim_stat.history_max_food
+    println!(
+        "Num_cells_alive: {:0>4}\nHistory( Cells: {:0>4}, Dead: {:0>4}, Max.alive: {:0>4}, Max.new: {:0>4}, Max.dead: {:0>4}, Max.age {:0>4}, Max.food: {:.6?}\n",
+        num_cells_alive,
+        sim_stat.history_total_cells,
+        sim_stat.history_dead_cells,
+        sim_stat.history_max_alive_cells,
+        sim_stat.history_max_new_cells,
+        sim_stat.history_max_dead_cells,
+        sim_stat.history_max_age,
+        sim_stat.history_max_food
     );
 }
 
+/**
+ * Function to parse a command line argument number of unspecified range as a `u16`.
+ *
+ * In the original contest, some test executions provided values for the three random seed
+ * sequences that were out of the range of the containing `short` (`i16`) type, and wrapped when
+ * parsed. Rust and clap do not wrap automatically when parsing numbers from strings, however.
+ *
+ * This function extracts any number (that fits in a `u64`) from a string, and then wraps it to a
+ * `u16` type.
+ */
+fn parse_cli_short(s: &str) -> Result<u16, String> {
+    match s.parse::<u64>() {
+        Ok(v) => Ok(v as u16),
+        Err(_) => return Err(format!("'{}' is not a valid number", s)),
+    }
+}
+
 /* Struct: Parse the command line arguments */
-#[derive(Parser,Debug)]
+#[derive(Parser, Debug)]
 struct Arguments {
     /// Cultivation area size (rows)
     rows: usize,
@@ -218,29 +245,32 @@ struct Arguments {
     /// Maximum number of food level in a new source
     food_level: f32,
     /// Status of the init random sequence (1)
+    #[clap(value_parser=parse_cli_short)]
     init_random_seq1: u16,
     /// Status of the init random sequence (2)
+    #[clap(value_parser=parse_cli_short)]
     init_random_seq2: u16,
     /// Status of the init random sequence (3)
+    #[clap(value_parser=parse_cli_short)]
     init_random_seq3: u16,
     /// Number of cells in the area at the beginning of the simulation
     num_cells: i32,
-    #[clap(default_value_t=0usize)]
+    #[clap(default_value_t = 0usize)]
     /// Optional: Special food spot: Initial row
     food_spot_row: usize,
-    #[clap(default_value_t=0usize)]
+    #[clap(default_value_t = 0usize)]
     /// Optional: Special food spot: Initial col
     food_spot_col: usize,
-    #[clap(default_value_t=0usize)]
+    #[clap(default_value_t = 0usize)]
     /// Optional: Special food spot: Rows size
     food_spot_size_rows: usize,
-    #[clap(default_value_t=0usize)]
+    #[clap(default_value_t = 0usize)]
     /// Optional: Special food spot: Cols size
     food_spot_size_cols: usize,
-    #[clap(default_value_t=0f32)]
+    #[clap(default_value_t = 0f32)]
     /// Optional: Special food spot: Food density
     food_spot_denisty: f32,
-    #[clap(default_value_t=0f32)]
+    #[clap(default_value_t = 0f32)]
     /// Optional: Special food spot: Food level
     food_spot_level: f32,
 }
@@ -259,12 +289,14 @@ fn main() {
     let mut culture: Mat<f32> = Mat::<f32>::new(args.rows, args.cols);
     let mut culture_cells: Mat<i16> = Mat::<i16>::new(args.rows, args.cols);
 
-    let init_random_seed: u64 = (args.init_random_seq1 as u64) << 32 | (args.init_random_seq2 as u64) << 16 | (args.init_random_seq3 as u64);
+    let init_random_seed: u64 = (args.init_random_seq1 as u64) << 32
+        | (args.init_random_seq2 as u64) << 16
+        | (args.init_random_seq3 as u64);
     let mut g_rng: ChaCha8Rng = ChaCha8Rng::seed_from_u64(init_random_seed);
     let mut food_random_seq: ChaCha8Rng = ChaCha8Rng::seed_from_u64(g_rng.next_u64());
     let mut food_spot_random_seq: ChaCha8Rng = ChaCha8Rng::seed_from_u64(g_rng.next_u64());
 
-    let mut num_cells: i32 = args.num_cells;    // Number of cells currently stored in the list
+    let mut num_cells: i32 = args.num_cells; // Number of cells currently stored in the list
     let mut cells: Vec<Cell> = Vec::<Cell>::with_capacity(num_cells as usize); // List to store cells information
 
     // Statistics
@@ -276,11 +308,11 @@ fn main() {
         pos_col: 0.0,
         mov_row: 0.0,
         mov_col: 0.0,
-        choose_mov: [ 0.33f32, 0.34f32, 0.33f32 ],
+        choose_mov: [0.33f32, 0.34f32, 0.33f32],
         storage: 0.0,
         age: 0,
         random_seq: Box::new(g_rng.clone()),
-        alive: true
+        alive: true,
     };
     for _i in 0..num_cells {
         let seed: u64 = g_rng.next_u64();
@@ -302,12 +334,12 @@ fn main() {
     /* 3. Initialize culture surface and initial cells */
     for cell in cells.iter_mut() {
         // Initial age: Between 1 and 20
-        cell.age = cell.random_seq.gen_range(1i32..20i32);
+        cell.age = cell.random_seq.random_range(1i32..20i32);
         // Initial storage: Between 10 and 20 units
-        cell.storage = cell.random_seq.gen_range(10f32..20f32);
+        cell.storage = cell.random_seq.random_range(10f32..20f32);
         // Initial position: Anywhere in the culture arena
-        cell.pos_row = cell.random_seq.gen_range(0f32..args.rows as f32);
-        cell.pos_col = cell.random_seq.gen_range(0f32..args.cols as f32);
+        cell.pos_row = cell.random_seq.random_range(0f32..args.rows as f32);
+        cell.pos_col = cell.random_seq.random_range(0f32..args.cols as f32);
         // Movement direction: Unity vector in a random direction
         cell.new_direction();
     }
@@ -340,18 +372,22 @@ fn main() {
         // Across the whole culture
         let num_new_sources: i32 = (args.rows as f32 * args.cols as f32 * args.food_density) as i32;
         for _ in 0..num_new_sources {
-            let row: usize = food_random_seq.gen_range(0..args.rows) as usize;
-            let col: usize = food_random_seq.gen_range(0..args.cols) as usize;
-            let food: f32 = food_random_seq.gen_range(0f32..args.food_level);
+            let row: usize = food_random_seq.random_range(0..args.rows) as usize;
+            let col: usize = food_random_seq.random_range(0..args.cols) as usize;
+            let food: f32 = food_random_seq.random_range(0f32..args.food_level);
             culture[(row, col)] += food;
         }
         // In the special food spot
         if food_spot_active {
-            let num_new_sources: i32 = (args.food_spot_size_rows as f32 * args.food_spot_size_cols as f32 * args.food_spot_denisty) as i32;
+            let num_new_sources: i32 = (args.food_spot_size_rows as f32
+                * args.food_spot_size_cols as f32
+                * args.food_spot_denisty) as i32;
             for _ in 0..num_new_sources {
-                let row: usize = args.food_spot_row + food_spot_random_seq.gen_range(0..args.food_spot_size_rows) as usize;
-                let col: usize = args.food_spot_col + food_spot_random_seq.gen_range(0..args.food_spot_size_cols) as usize;
-                let food: f32 = food_spot_random_seq.gen_range(0f32..args.food_spot_level);
+                let row: usize = args.food_spot_row
+                    + food_spot_random_seq.random_range(0..args.food_spot_size_rows) as usize;
+                let col: usize = args.food_spot_col
+                    + food_spot_random_seq.random_range(0..args.food_spot_size_cols) as usize;
+                let food: f32 = food_spot_random_seq.random_range(0f32..args.food_spot_level);
                 culture[(row, col)] += food;
             }
         }
@@ -394,7 +430,7 @@ fn main() {
                     cell.storage -= 1.0f32;
 
                     /* 4.3.2. Choose movement direction */
-                    let prob: f32 = cell.random_seq.gen_range(0f32..1f32);
+                    let prob: f32 = cell.random_seq.random_range(0f32..1f32);
                     if prob < cell.choose_mov[0] {
                         // Turn left (90 degrees)
                         let tmp: f32 = cell.mov_col;
@@ -412,10 +448,18 @@ fn main() {
                     cell.pos_row += cell.mov_row;
                     cell.pos_col += cell.mov_col;
                     // Periodic arena: Left/Right edges are connected, Top/Bottom edges are connected
-                    if cell.pos_row < 0f32 { cell.pos_row += args.rows as f32; }
-                    if cell.pos_row >= args.rows as f32 { cell.pos_row -= args.rows as f32; }
-                    if cell.pos_col < 0f32 { cell.pos_col += args.cols as f32; }
-                    if cell.pos_col >= args.cols as f32 { cell.pos_col -= args.cols as f32; }
+                    if cell.pos_row < 0f32 {
+                        cell.pos_row += args.rows as f32;
+                    }
+                    if cell.pos_row >= args.rows as f32 {
+                        cell.pos_row -= args.rows as f32;
+                    }
+                    if cell.pos_col < 0f32 {
+                        cell.pos_col += args.cols as f32;
+                    }
+                    if cell.pos_col >= args.cols as f32 {
+                        cell.pos_col -= args.cols as f32;
+                    }
                 }
 
                 /* 4.3.4. Annotate that there is one more cell in this culutre position */
@@ -501,18 +545,33 @@ fn main() {
 
         /* 4.9. Statistics */
         // Statistics: Max food
-        if current_max_food > sim_stat.history_max_food { sim_stat.history_max_food = current_max_food; }
+        if current_max_food > sim_stat.history_max_food {
+            sim_stat.history_max_food = current_max_food;
+        }
         // Statistics: Max new cells per step
-        if step_new_cells > sim_stat.history_max_new_cells { sim_stat.history_max_new_cells = step_new_cells; }
+        if step_new_cells > sim_stat.history_max_new_cells {
+            sim_stat.history_max_new_cells = step_new_cells;
+        }
         // Statistics: Accumulated dead and Max dead cells per step
         sim_stat.history_dead_cells += step_dead_cells;
-        if step_dead_cells > sim_stat.history_max_dead_cells { sim_stat.history_max_dead_cells = step_dead_cells; }
+        if step_dead_cells > sim_stat.history_max_dead_cells {
+            sim_stat.history_max_dead_cells = step_dead_cells;
+        }
         // Statistics: Max alive cells per step
-        if num_cells_alive > sim_stat.history_max_alive_cells { sim_stat.history_max_alive_cells = num_cells_alive; }
+        if num_cells_alive > sim_stat.history_max_alive_cells {
+            sim_stat.history_max_alive_cells = num_cells_alive;
+        }
 
         #[cfg(feature = "debug")]
         {
-            print_status(_iter, &culture, num_cells, &cells, num_cells_alive, &sim_stat);
+            print_status(
+                _iter,
+                &culture,
+                num_cells,
+                &cells,
+                num_cells_alive,
+                &sim_stat,
+            );
         }
         iter += 1;
     }
@@ -535,7 +594,8 @@ fn main() {
 
     /* 6.2. Results: Number of iterations and other statistics */
     print!("Result: {}, ", iter);
-    println!("{}, {}, {}, {}, {}, {}, {} {}",
+    println!(
+        "{}, {}, {}, {}, {}, {}, {} {}",
         num_cells_alive,
         sim_stat.history_total_cells,
         sim_stat.history_dead_cells,
@@ -550,4 +610,3 @@ fn main() {
 
     /* 8. End */
 }
-
